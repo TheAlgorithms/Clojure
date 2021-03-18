@@ -7,6 +7,10 @@
 
 These implementations are for learning purposes only. Therefore they may be less efficient than the implementations in the Clojure standard library.
 
+## List of Algorithms
+
+See our [directory](DIRECTORY.md).
+
 ## Community Channel
 
 We're on [Gitter](https://gitter.im/TheAlgorithms)!  Please join us.
