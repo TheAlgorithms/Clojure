@@ -7,6 +7,11 @@
 
 These implementations are for learning purposes only. Therefore they may be less efficient than the implementations in the Clojure standard library.
 
+#### To run all the tests execute 
+```bash
+clojure -X:test
+```
+
 ## List of Algorithms
 
 See our [directory](DIRECTORY.md).
