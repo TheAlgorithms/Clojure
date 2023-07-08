@@ -4,6 +4,7 @@
 ## Data Structures
 
 * List
+    * [List data structure implementation](https://github.com/TheAlgorithms/Clojure/blob/main/src/data_structures/lists/linked_list.clj)
     * [Last item in a list](https://github.com/TheAlgorithms/Clojure/blob/main/src/data_structures/lists/last_item_in_a_list.clj)
     * [Penultimate item in a list](https://github.com/TheAlgorithms/Clojure/blob/main/src/data_structures/lists/penultimate_item_in_a_list.clj)
     * [Length of a list](https://github.com/TheAlgorithms/Clojure/blob/main/src/data_structures/lists/length_of_list.clj)
