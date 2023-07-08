@@ -1,6 +1,8 @@
 (ns sorts.merge-sort-test
-  (:require  [clojure.test :refer :all]
-             [sorts.merge-sort :as sut]))
+  (:require
+    [clojure.test :refer :all]
+    [sorts.merge-sort :as sut]
+    [utils :refer [random-int-seq]]))
 
 (deftest merge-sort-test
   (testing "single item arary"
@@ -26,3 +28,9 @@
   (testing "unsorted array worst case"
     (is (= (sut/merge-sort [1 2 3 4 5 6 7 8 9 10 11 12 13 14 0])
            [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14]))))
+
+(deftest lazy-merge-sort-test
+  (testing "lazy-merge-sort sorts the collection"
+    (let [input (random-int-seq 100)
+          expected (sort input)]
+      (is (= expected (sut/lazy-merge-sort input))))))

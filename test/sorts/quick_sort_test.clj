@@ -1,20 +1,17 @@
 (ns sorts.quick-sort-test
   (:require
+    [utils :refer [random-int-seq]]
     [clojure.test :refer [deftest testing is]]
-    [sorts.quick-sort :refer [lazy-quicksort quicksort]]))
+    [sorts.quick-sort :refer [lazy-quick-sort quick-sort]]))
 
-(defn random-int-seq
-  [size]
-  (take size (iterate (comp rand-int #(+ 10 %)) 5)))
-
-(deftest lazy-quicksort-test
+(deftest lazy-quick-sort-test
   (testing "lazy-quicksort sorts the collection"
     (let [input (random-int-seq 100)
           expected (sort input)]
-      (is (= expected (lazy-quicksort input))))))
+      (is (= expected (lazy-quick-sort input))))))
 
-(deftest quicksort-test
+(deftest quick-sort-test
   (testing "loop based quicksort sorts the collection"
     (let [input (random-int-seq 100)
           expected (sort input)]
-      (is (= expected (quicksort input))))))
+      (is (= expected (quick-sort input))))))
