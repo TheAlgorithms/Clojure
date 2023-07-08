@@ -19,3 +19,4 @@
 * [Merge Sort](https://github.com/TheAlgorithms/Clojure/blob/main/src/sorts/merge_sort.clj)
 * [Quick Sort](https://github.com/TheAlgorithms/Clojure/blob/main/src/sorts/quick_sort.clj)
 * [Heap Sort](https://github.com/TheAlgorithms/Clojure/blob/main/src/sorts/heap_sort.clj)
+* [Insertion Sort](https://github.com/TheAlgorithms/Clojure/blob/main/src/sorts/insertion_sort.clj)
