@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer :all]
     [sorts.merge-sort :as sut]
-    [utils :refer [random-int-seq]]))
+    [utils :refer [random-number-seq]]))
 
 (deftest merge-sort-test
   (testing "single item arary"
@@ -31,6 +31,6 @@
 
 (deftest lazy-merge-sort-test
   (testing "lazy-merge-sort sorts the collection"
-    (let [input (random-int-seq 100)
+    (let [input (random-number-seq 100)
           expected (sort input)]
       (is (= expected (sut/lazy-merge-sort input))))))
