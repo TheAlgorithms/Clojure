@@ -1,4 +1,5 @@
 (ns sorts.insertion-sort)
+
 (defn insertion-sort
   [number-seq]
   (loop [sorted []
