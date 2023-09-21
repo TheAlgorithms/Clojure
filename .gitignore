@@ -14,3 +14,4 @@ pom.xml.asc
 *.db
 CHANGELOG.md
 *.iml
+/.cpcache
