@@ -3,4 +3,12 @@
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
                                io.github.cognitect-labs/test-runner {:git/tag "v0.5.0" :git/sha "48c3c67"}}
-                  :exec-fn cognitect.test-runner.api/test}}}
+                  :exec-fn cognitect.test-runner.api/test}
+           :coverage {:extra-paths ["test"]
+                      :extra-deps {cloverage/cloverage {:mvn/version "1.2.4"}}
+                      :main-opts ["--main" "cloverage.coverage"
+                                  "--test-ns-path" "test"]
+                      :exec-fn cloverage.coverage/run-project
+                      :exec-args {:src-ns-path  ["src"]
+                                  :test-ns-path ["test"]
+                                  :codecov? true}}}}
