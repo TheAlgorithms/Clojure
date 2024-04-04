@@ -5,30 +5,35 @@
 (deftest ->DynamicArray-test
   (testing "throws when invalid initial capacity is provided"
     (is (thrown? IllegalArgumentException (da/->DynamicArray 0)))
-    (is (thrown? IllegalArgumentException (da/->DynamicArray -1)))))
+    (is (thrown? IllegalArgumentException (da/->DynamicArray -1))))
+
+  (testing "returns a dynamic array for a valid capacity"
+    (is (= [3 []] (da/->DynamicArray 3)))))
+
 (deftest empty?-test
   (testing "return true if dynamic array is empty"
     (let [dynamic-array (da/->DynamicArray 3)]
       (is (true? (da/empty? dynamic-array)))))
 
   (testing "return false if dynamic array is empty"
-    (let [dynamic-array (da/->DynamicArray 3)]
-      (da/set dynamic-array (da/next-idx dynamic-array) 20)
-      (da/set dynamic-array (da/next-idx dynamic-array) 30)
-      (is (false? (da/empty? dynamic-array))))))
+    (is (false? (da/empty? (-> (da/->DynamicArray 3)
+                               (da/append 10)
+                               (da/append 20)))))))
 
 (deftest length-test
-  (testing "returns initial capacity till dynamic array is full"
+  (testing "returns the length of the dynamic array"
     (let [dynamic-array (da/->DynamicArray 3)]
-      (is (= 3 (da/length dynamic-array)))))
+      (is (= 0 (da/length dynamic-array)))
+      (is (= 3 (da/capacity dynamic-array)))))
 
-  (testing "returns expanded capacity once storage demands exceeds initial capacity"
-    (let [dynamic-array (da/->DynamicArray 3)]
-      (da/set dynamic-array (da/next-idx dynamic-array) 10)
-      (da/set dynamic-array (da/next-idx dynamic-array) 20)
-      (da/set dynamic-array (da/next-idx dynamic-array) 30)
-      (da/set dynamic-array (da/next-idx dynamic-array) 40)
-      (is (= 6 (da/length dynamic-array))))))
+  (testing "returns the length of the dynamic array"
+    (let [dynamic-array (-> (da/->DynamicArray 3)
+                            (da/append 10)
+                            (da/append 20)
+                            (da/append 30)
+                            (da/append 40))]
+      (is (= 4 (da/length dynamic-array)))
+      (is (= 6 (da/capacity dynamic-array))))))
 
 (deftest next-idx-test
   (testing "returns initial index as the starting point when dynamic array is empty"
@@ -36,33 +41,41 @@
       (is (= 0 (da/next-idx dynamic-array)))))
 
   (testing "returns current filled index as the starting point when dynamic array is empty"
-    (let [dynamic-array (da/->DynamicArray 3)]
-      (da/set dynamic-array (da/next-idx dynamic-array) 10)
-      (da/set dynamic-array (da/next-idx dynamic-array) 20)
-      (da/set dynamic-array (da/next-idx dynamic-array) 30)
-      (is (= 3 (da/next-idx dynamic-array))))))
+    (is (= 3 (as-> (da/->DynamicArray 3) dynamic-array
+                   (da/set dynamic-array (da/next-idx dynamic-array) 10)
+                   (da/set dynamic-array (da/next-idx dynamic-array) 20)
+                   (da/set dynamic-array (da/next-idx dynamic-array) 30)
+                   (da/next-idx dynamic-array))))))
 
 (deftest set-test
-  (let [dynamic-array (da/->DynamicArray 3)]
-    (testing "throws Assertion error when index is less than 0"
-      (is (thrown? AssertionError (da/set dynamic-array -1 10))))
+  (testing "throws Assertion error when index is less than 0"
+    (let [dynamic-array (da/->DynamicArray 3)]
+      (is (thrown? AssertionError (da/set dynamic-array -1 10)))))
 
-    (testing "stores the element within the dynamic array when a valid index is provided"
-      (da/set dynamic-array (da/next-idx dynamic-array) 10)
+  (testing "stores the element within the dynamic array when a valid index is provided"
+    (let [dynamic-array (as-> (da/->DynamicArray 3) dynamic-array
+                              (da/set dynamic-array (da/next-idx dynamic-array) 10))]
       (is (false? (da/empty? dynamic-array)))
-      (is (= 1 (da/next-idx dynamic-array))))
+      (is (= 1 (da/next-idx dynamic-array)))))
 
-    (testing "expands dynamic array to incorporate more elements"
-      (da/set dynamic-array (da/next-idx dynamic-array) 20)
-      (da/set dynamic-array (da/next-idx dynamic-array) 30)
-      (da/set dynamic-array (da/next-idx dynamic-array) 40)
+  (testing "expands dynamic array to incorporate more elements"
+    (let [dynamic-array (as-> (da/->DynamicArray 3) dynamic-array
+                              (da/set dynamic-array (da/next-idx dynamic-array) 10)
+                              (da/set dynamic-array (da/next-idx dynamic-array) 20)
+                              (da/set dynamic-array (da/next-idx dynamic-array) 30)
+                              (da/set dynamic-array (da/next-idx dynamic-array) 40))]
       (is (= 4 (da/next-idx dynamic-array)))
-      (is (= 6 (da/length dynamic-array))))
+      (is (= 6 (da/capacity dynamic-array)))))
 
-    (testing "expands dynamic array to incorporate for an arbitrary large index and sets next-idx accordingly"
-      (da/set dynamic-array 60 40)
+  (testing "expands dynamic array to incorporate for an arbitrary large index and sets next-idx accordingly"
+    (let [dynamic-array (as-> (da/->DynamicArray 3) dynamic-array
+                              (da/set dynamic-array (da/next-idx dynamic-array) 10)
+                              (da/set dynamic-array (da/next-idx dynamic-array) 20)
+                              (da/set dynamic-array (da/next-idx dynamic-array) 30)
+                              (da/set dynamic-array (da/next-idx dynamic-array) 40)
+                              (da/set dynamic-array 60 40))]
       (is (= 61 (da/next-idx dynamic-array)) "This behaviour causes fragmentation in the dynamic array")
-      (is (= 120 (da/length dynamic-array))))))
+      (is (= 122 (da/capacity dynamic-array))))))
 
 (deftest get-test
   (let [dynamic-array (da/->DynamicArray 3)]
@@ -74,7 +87,9 @@
 
     (testing "fetches the content of the dynamic array stored at valid index"
       (da/set dynamic-array (da/next-idx dynamic-array) 40)
-      (is (= 40 (da/get dynamic-array (dec (da/next-idx dynamic-array))))))))
+      (is (= 40 (as-> dynamic-array $
+                      (da/set $ (da/next-idx $) 40)
+                      (da/get $ (dec (da/next-idx $)))))))))
 
 (deftest remove-test
   (let [dynamic-array (da/->DynamicArray 3)]
@@ -85,48 +100,52 @@
       (is (thrown? AssertionError (da/remove dynamic-array (inc (da/next-idx dynamic-array))))))
 
     (testing "removes the element from the dynamic array and returns it if the index is valid"
-      (da/set dynamic-array (da/next-idx dynamic-array) 10)
-      (da/set dynamic-array (da/next-idx dynamic-array) 20)
-      (da/set dynamic-array (da/next-idx dynamic-array) 30)
-      (da/set dynamic-array (da/next-idx dynamic-array) 40)
-      (is (= 4 (da/next-idx dynamic-array)) "Sanity check to ensure that next-index is correctly calculated")
-      (is (= 30 (da/remove dynamic-array 2)))
-      (is (= 3 (da/next-idx dynamic-array)))
-      (is (= "[ 10 20 40 ]" (.toString dynamic-array))))))
+      (let [dynamic-array (as-> dynamic-array $
+                                (da/set $ (da/next-idx $) 10)
+                                (da/set $ (da/next-idx $) 20)
+                                (da/set $ (da/next-idx $) 30)
+                                (da/set $ (da/next-idx $) 40))]
+        (is (= 4 (da/next-idx dynamic-array)) "Sanity check to ensure that next-index is correctly calculated")
+        (is (= [6 [10 20 40]] (da/remove dynamic-array 2)))
+        (is (= 3 (da/next-idx (da/remove dynamic-array 2))))
+        (is (= "[ 10 20 40 ]" (da/to-string (da/remove dynamic-array 2))))))))
 
 (deftest append-test
-  (let [dynamic-array (da/->DynamicArray 3)]
-    (testing "appends values to dynamic array"
-      (da/set dynamic-array (da/next-idx dynamic-array) 10)
-      (da/set dynamic-array (da/next-idx dynamic-array) 20)
+  (testing "appends values to dynamic array"
+    (let [dynamic-array (-> (da/->DynamicArray 3)
+                            (da/append 10)
+                            (da/append 20))]
       (is (= 2 (da/next-idx dynamic-array)))
-      (is (= 3 (da/length dynamic-array))))
+      (is (= 3 (da/capacity dynamic-array)))
 
-    (testing "expands dynamic array to allocate more elements"
-      (da/set dynamic-array (da/next-idx dynamic-array) 30)
-      (da/set dynamic-array (da/next-idx dynamic-array) 40)
-      (is (= 4 (da/next-idx dynamic-array)))
-      (is (= 6 (da/length dynamic-array))))))
+      (testing "expands dynamic array to allocate more elements"
+        (let [dynamic-array (-> dynamic-array
+                                (da/append 30)
+                                (da/append 40))]
+          (is (= 4 (da/next-idx dynamic-array)))
+          (is (= 6 (da/capacity dynamic-array))))))))
 
-(deftest pop-test
+(deftest pop-array-test
   (let [dynamic-array (da/->DynamicArray 3)]
     (testing "throws when the dynamic array is empty"
-      (is (thrown? AssertionError (da/pop dynamic-array))))
+      (is (thrown? AssertionError (da/pop-array dynamic-array))))
 
     (testing "pops the element from dynamic array and returns it"
-      (da/set dynamic-array (da/next-idx dynamic-array) 10)
-      (da/set dynamic-array (da/next-idx dynamic-array) 20)
-      (da/set dynamic-array (da/next-idx dynamic-array) 30)
-      (is (= 30 (da/pop dynamic-array)))
-      (is (= 2 (da/next-idx dynamic-array))))))
+      (let [dynamic-array (-> dynamic-array
+                              (da/append 10)
+                              (da/append 20)
+                              (da/append 30)
+                              (da/pop-array))]
+        (is (= [3 [10 20]] dynamic-array))
+        (is (= 2 (da/next-idx dynamic-array)))))))
 
-(deftest toString-test
+(deftest to-string-test
   (testing "provides string representation of an empty array"
     (let [dynamic-array (da/->DynamicArray 3)]
-      (is (= "[ ]" (.toString dynamic-array)))))
+      (is (= "[ ]" (da/to-string dynamic-array)))))
 
   (testing "provides string representation of a non empty array"
-    (let [dynamic-array (da/->DynamicArray 10)]
+    (with-local-vars [dynamic-array (da/->DynamicArray 10)]
       (doseq [i (range 10 15)]
-        (da/append dynamic-array i))
-      (is (= "[ 10 11 12 13 14 ]" (.toString dynamic-array))))))
+        (var-set dynamic-array (da/append (var-get dynamic-array) i)))
+      (is (= "[ 10 11 12 13 14 ]" (da/to-string (var-get dynamic-array)))))))
