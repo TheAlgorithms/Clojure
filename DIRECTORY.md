@@ -17,6 +17,7 @@
     * [Run length encoding](https://github.com/TheAlgorithms/Clojure/blob/main/src/data_structures/lists/run_length_encoding.clj)
 
 * [Dynamic Array implementation](/src/data_structures/dynamic_array/core.clj) 
+* [Immutable Stack implementation](/src/data_structures/stack/core.clj)
 
 ## Sorting
 * [Merge Sort](https://github.com/TheAlgorithms/Clojure/blob/main/src/sorts/merge_sort.clj)
