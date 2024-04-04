@@ -30,6 +30,22 @@
                    (s/push-in-stack "another-other-value")
                    (s/full-stack?))))))
 
+(deftest push-in-stack-test
+  (testing "pushes element in a not full stack"
+    (is (= [3 ["a-value" "other-value" "another-other-value"]]
+           (-> (s/->Stack 3)
+               (s/push-in-stack "a-value")
+               (s/push-in-stack "other-value")
+               (s/push-in-stack "another-other-value")))))
+
+  (testing "throws error when trying to push element in a full stack"
+    (is (thrown? AssertionError
+           (-> (s/->Stack 3)
+               (s/push-in-stack "a-value")
+               (s/push-in-stack "other-value")
+               (s/push-in-stack "another-other-value")
+               (s/push-in-stack "yet-another-other-value"))))))
+
 (deftest peek-at-stack-test
   (testing "returns peeking at an empty stack"
     (is (nil? (-> (s/->Stack 3)
