@@ -1,85 +1,79 @@
 (ns data-structures.dynamic-array.core
-  (:refer-clojure :exclude [get set empty? remove pop]))
+  (:refer-clojure :exclude [get set empty? remove])
+  (:import (clojure.lang RT)))
 
 ;; See tests for the documentation on implementation
-(defprotocol IDynamicArray
-  (get [this idx])
-  (set [this idx value])
-  (remove [this idx])
-  (empty? [this])
-  (length [this])
-  (next-idx [this])
-  (append [this value])
-  (pop [this]))
-
-(deftype DynamicArray [^:unsynchronized-mutable length
-                       ^:unsynchronized-mutable next-idx
-                       ^:unsynchronized-mutable array]
-  IDynamicArray
-  (get [_ idx]
-    (assert (< -1 idx next-idx) "Invalid index value supplied")
-    (aget array idx))
-  (set [_ idx value]
-    (assert (<= 0 idx) "Invalid index value supplied")
-    (when (or (= next-idx length) (> idx length))
-      (let [next-length (* idx 2)
-            next-array (make-array Integer/TYPE next-length)]
-        (doseq [i (range length)]
-          (->> (aget array i)
-               (aset next-array i)))
-        (set! array next-array)
-        (set! length next-length)))
-    (aset array next-idx value)
-    (set! next-idx (inc idx))
-    idx)
-  (remove [_ idx]
-    (assert (< -1 idx next-idx) "Invalid index value supplied")
-    (let [next-next-idx (dec next-idx)
-          popped-element (aget array idx)]
-      (doseq [dest-idx (range idx next-idx)
-              :let [source-idx (inc dest-idx)]
-              :when (not= source-idx length)]
-        (aset array dest-idx (aget array source-idx)))
-      (set! next-idx next-next-idx)
-      popped-element))
-  (empty? [_]
-    (zero? next-idx))
-  (length [_]
-    (alength array))
-  (next-idx [this]
-    next-idx)
-  (append [_ value]
-    (when (= next-idx length)
-      (let [next-length (* length 2)
-            next-array (make-array Integer/TYPE next-length)]
-        (doseq [i (range length)]
-          (->> (aget array i)
-               (aset next-array i)))
-        (set! array next-array)
-        (set! length next-length)))
-    (let [old-capacity next-idx]
-      (aset array next-idx value)
-      (set! next-idx (inc next-idx))
-      old-capacity))
-  (pop [_]
-    (assert (> next-idx 0) "Nothing to pop")
-    (let [next-next-idx (dec next-idx)
-          popped-element (aget array next-next-idx)]
-      (aset array next-next-idx 0)
-      (set! next-idx next-next-idx)
-      popped-element))
-  Object
-  (toString [_]
-    (let [^StringBuilder sb (StringBuilder.)]
-      (.append sb "[ ")
-      (doseq [i (range next-idx)]
-        (.append sb (aget array i))
-        (.append sb " "))
-      (.append sb "]")
-      (.toString sb))))
 
 (defn ->DynamicArray
   [initial-capacity]
   (when (>= 0 initial-capacity)
     (throw (IllegalArgumentException. "Invalid initial capacity")))
-  (DynamicArray. initial-capacity 0 (make-array Integer/TYPE initial-capacity)))
+  [initial-capacity []])
+
+(defn capacity
+  [dynamic-array]
+  (let [[cap _] dynamic-array]
+    cap))
+
+(defn length
+  [dynamic-array]
+  (let [[_ store] dynamic-array]
+    (count store)))
+
+(defn empty?
+  [dynamic-array]
+  (zero? (length dynamic-array)))
+
+(defn get
+  [dynamic-array idx]
+  (assert (< -1 idx (length dynamic-array)) "Invalid index value supplied")
+  (let [[_ store] dynamic-array]
+    (nth store idx)))
+
+(defn set
+  [dynamic-array idx value]
+  (assert (<= 0 idx) "Invalid index value supplied")
+  (let [[capacity store] dynamic-array]
+    (if (< idx (dec capacity))
+      [capacity (assoc store idx value)]
+      [(* 2 (inc idx)) (into []
+                       cat
+                       [store
+                        (vec (repeat (- idx (count store)) nil))
+                        [value]])])))
+
+(defn remove
+  [dynamic-array idx]
+  (assert (< -1 idx (length dynamic-array)) "Invalid index value supplied")
+  (let [[capacity store] dynamic-array]
+    [capacity (into []
+                    cat
+                    [(subvec store 0 idx)
+                     (subvec store (inc idx))])]))
+
+(defn next-idx
+  [dynamic-array]
+  (length dynamic-array))
+
+(defn append
+  [dynamic-array value]
+  (let [[capacity store] dynamic-array]
+    (if (not= capacity (count store))
+      [capacity (conj store value)]
+      [(* 2 capacity) (conj store value)])))
+
+(defn pop-array
+  [dynamic-array]
+  (assert (not (empty? dynamic-array)) "Nothing to pop")
+  (let [[capacity store] dynamic-array]
+    [capacity (pop store)]))
+
+(defn to-string
+  [dynamic-array]
+  (let [^StringBuilder sb (StringBuilder.)]
+    (.append sb "[ ")
+    (doseq [i (range (length dynamic-array))]
+      (.append sb (get dynamic-array i))
+      (.append sb " "))
+    (.append sb "]")
+    (.toString sb)))
