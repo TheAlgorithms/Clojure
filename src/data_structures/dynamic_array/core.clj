@@ -1,6 +1,5 @@
 (ns data-structures.dynamic-array.core
-  (:refer-clojure :exclude [get set empty? remove])
-  (:import (clojure.lang RT)))
+  (:refer-clojure :exclude [get set empty? remove]))
 
 ;; See tests for the documentation on implementation
 

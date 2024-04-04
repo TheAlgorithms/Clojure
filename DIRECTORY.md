@@ -18,6 +18,9 @@
 
 * [Dynamic Array implementation](/src/data_structures/dynamic_array/core.clj) 
 * [Immutable Stack implementation](/src/data_structures/stack/core.clj)
+* Immutable Queue implementations
+  * [using vector](/src/data_structures/queue/vector.clj)
+  * [using list](/src/data_structures/queue/list.clj)
 
 ## Sorting
 * [Merge Sort](https://github.com/TheAlgorithms/Clojure/blob/main/src/sorts/merge_sort.clj)
